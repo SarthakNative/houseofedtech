@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { cloudinaryService } from "@/app/services/cloudinaryService";
+import toast from 'react-hot-toast';
 
 interface FormField {
   name: string;
@@ -71,7 +72,17 @@ export default function FormPage() {
 
     } catch (error) {
       console.error(`Error uploading files for ${fieldName}:`, error);
-      alert(`Failed to upload files for ${fieldName}`);
+      toast.error(`Failed to upload files for ${fieldName}`, {
+      duration: 3000,
+      position: 'top-right',
+      style: {
+        background: 'red',
+        color: '#fff',
+        padding: '16px',
+        borderRadius: '8px',
+      },
+      icon: '❌',
+    });
     }
   };
 
@@ -96,7 +107,18 @@ export default function FormPage() {
 
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/submissions`, submissionData);
 
-      alert("✅ Form submitted successfully!");
+        toast.success('Form submitted successfully!', {
+      duration: 3000,
+      position: 'top-right',
+      style: {
+        background: '#10b981',
+        color: '#fff',
+        padding: '16px',
+        borderRadius: '8px',
+      },
+      icon: '✅',
+    });
+
       console.log("Saved submission:", res.data);
       
       // Reset form
@@ -104,7 +126,18 @@ export default function FormPage() {
       setUploadedFiles({});
     } catch (error) {
       console.error("❌ Error submitting form:", error);
-      alert("Error submitting form. Check console for details.");
+      toast.error("Error submitting form. Check console for details.", {
+      duration: 3000,
+      position: 'top-right',
+      style: {
+        background: 'red',
+        color: '#fff',
+        padding: '16px',
+        borderRadius: '8px',
+      },
+      icon: '❌',
+    });
+
     } finally {
       setIsSubmitting(false);
     }
@@ -252,7 +285,7 @@ export default function FormPage() {
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded font-semibold w-full transition-colors"
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded font-semibold w-full transition-colors cursor-pointer"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Form'}
           </button>

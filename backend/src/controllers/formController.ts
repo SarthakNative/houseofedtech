@@ -95,3 +95,77 @@ export const submitForm = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to save submission" });
   }
 };
+
+// NEW: Update form controller
+export const updateForm = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    const { title} = req.body;
+
+    // Find the form and verify ownership
+    const form = await Form.findById(id);
+    
+    if (!form) {
+      return res.status(404).json({ message: "Form not found" });
+    }
+
+    // Check if the user owns the form
+    if (form.owner.toString() !== userId) {
+      return res.status(403).json({ 
+        message: "Unauthorized: You can only update your own forms" 
+      });
+    }
+
+    // Update only the fields that are provided
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title;
+
+    const updatedForm = await Form.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      message: "Form updated successfully",
+      form: updatedForm
+    });
+  } catch (error) {
+    console.error("Update form error:", error);
+    res.status(500).json({ message: "Failed to update form" });
+  }
+};
+
+// NEW: Delete form controller
+export const deleteForm = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    // Find the form and verify ownership
+    const form = await Form.findById(id);
+    
+    if (!form) {
+      return res.status(404).json({ message: "Form not found" });
+    }
+
+    // Check if the user owns the form
+    if (form.owner.toString() !== userId) {
+      return res.status(403).json({ 
+        message: "Unauthorized: You can only delete your own forms" 
+      });
+    }
+
+    // Delete the form
+    await Form.findByIdAndDelete(id);
+
+    res.json({ 
+      message: "Form deleted successfully",
+      deletedFormId: id
+    });
+  } catch (error) {
+    console.error("Delete form error:", error);
+    res.status(500).json({ message: "Failed to delete form" });
+  }
+};
