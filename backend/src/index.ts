@@ -40,7 +40,7 @@ app.use("/api/forms", formRoutes);
 app.use("/api/submissions", submissionRoutes);
 
 // Health check route
-app.get("/", (_, res) => res.send("TurbotechAssist API running ✅"));
+app.get("/", (_, res) => res.send("Sarthak's API for HouseOfEdTech is running ✅"));
 
 // ✅ FIXED: Connect to MongoDB without deprecated options
 mongoose.connect(process.env.MONGODB_URI || "")
