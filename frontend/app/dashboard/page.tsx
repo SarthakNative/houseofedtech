@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 
 interface FormField {
   name: string;
@@ -258,19 +259,32 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => copyFormLink(form._id)}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-3 py-2 rounded transition duration-200"
-                  >
-                    Copy Link
-                  </button>
-                  <button
-                    onClick={() => viewSubmissions(form)}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded transition duration-200"
-                  >
-                    View ({form.submissions?.length || 0})
-                  </button>
-                </div>
+  {/* Open Link + Copy Icon */}
+  <div className="flex items-center gap-1 flex-1">
+    <button
+      onClick={() => window.open(`${window.location.origin}/form/${form._id}`, "_blank")}
+      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded transition duration-200"
+    >
+      Open Link
+    </button>
+
+    <button
+      onClick={() => copyFormLink(form._id)}
+      className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition duration-200"
+      title="Copy Link"
+    >
+      <ClipboardDocumentIcon className="h-5 w-5" />
+    </button>
+  </div>
+
+  {/* View Submissions */}
+  <button
+    onClick={() => viewSubmissions(form)}
+    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded transition duration-200"
+  >
+    View ({form.submissions?.length || 0})
+  </button>
+</div>
               </div>
             </div>
           ))
