@@ -1,7 +1,7 @@
 # AI-Powered Form Generator
 Generate and share dynamic forms using AI (Google Gemini or mock), track submissions, and support image uploads via Cloudinary. Built with Next.js 16 + TypeScript frontend and Express + MongoDB backend.
 ## Live Link
-https://ai-form-generator-application.vercel.app/
+https://houseofedtech-zeta.vercel.app/dashboard
 
 ## Features
 
@@ -87,6 +87,8 @@ Image fields support file upload via Cloudinary (or mock upload)
 Submission stores responses in MongoDB
 
 ### Limitations
+
+Render service (backend) is currently a free plan. If the application is inactive for a longer period of time it may take upto 50 seconds to revoke the application again for use.
 
 Gemini integration is currently for free plan. 
 
