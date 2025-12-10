@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isFormsLoading, setIsFormsLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [forms, setForms] = useState<Form[]>([]);
   const [showFormModal, setShowFormModal] = useState(false);
@@ -80,17 +81,21 @@ export default function Dashboard() {
     checkAuth();
   }, [router]);
 
-  const loadUserForms = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/forms`,
-        { withCredentials: true }
-      );
-      setForms(response.data.forms || []);
-    } catch (err) {
-      console.error("Failed to load forms:", err);
-    }
-  };
+ const loadUserForms = async () => {
+  setIsFormsLoading(true); // Start loading
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/forms`,
+      { withCredentials: true }
+    );
+    setForms(response.data.forms || []);
+  } catch (err) {
+    console.error("Failed to load forms:", err);
+  } finally {
+    setIsFormsLoading(false); // Stop loading regardless of success/error
+  }
+};
+
 
   // Helper function to check if a string is a valid URL
   const isValidUrl = (string: string) => {
@@ -356,17 +361,18 @@ const handleUpdateForm = async (e: React.FormEvent) => {
     setShowFormModal(false);
   };
 
-  if (isLoading) {
+  if (isLoading || isFormsLoading) {
     return (
       <main className="p-8 max-w-6xl mx-auto bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking authentication...</p>
+          <p className="mt-4 text-gray-600">loading...</p>
         </div>
       </main>
     );
   }
 
+  
   return (
     <main className="p-8 max-w-6xl mx-auto bg-white min-h-screen">
       <div className="flex justify-between items-center mb-8 border-b pb-6">
@@ -398,147 +404,147 @@ const handleUpdateForm = async (e: React.FormEvent) => {
       )}
 
      {/* Forms Grid */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {forms.length === 0 ? (
-    <div className="col-span-full text-center py-12">
-      <div className="text-gray-400 text-6xl mb-4">📝</div>
-      <h3 className="text-xl font-semibold text-gray-700 mb-2">No forms yet</h3>
-      <p className="text-gray-500 mb-4">Create your first AI-generated form to get started</p>
-      <button
-        onClick={() => setShowFormModal(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition duration-200"
-      >
-        Create Your First Form
-      </button>
-    </div>
-  ) : (
-    forms.map((form) => {
-      // Check if form.schema exists, otherwise show loading skeleton
-      if (!form.schema) {
-        return (
-          <div key={`loading-${form._id}`} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-            <div className="p-6">
-              {/* Loading skeleton */}
-              <div className="animate-pulse">
-                {/* Action buttons skeleton */}
-                <div className="flex justify-end mb-4">
-                  <div className="flex gap-1">
-                    <div className="w-8 h-8 bg-gray-200 rounded-md"></div>
-                    <div className="w-8 h-8 bg-gray-200 rounded-md"></div>
-                  </div>
-                </div>
-                
-                {/* Title skeleton */}
-                <div className="h-6 bg-gray-200 rounded mb-4 w-3/4"></div>
-                
-                {/* Fields/submissions count skeleton */}
-                <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
-                
-                {/* Fields list skeleton */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-gray-200 rounded-full mr-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-gray-200 rounded-full mr-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-gray-200 rounded-full mr-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-                
-                {/* Buttons skeleton */}
-                <div className="flex gap-2">
-                  <div className="flex-1 flex items-center gap-1">
-                    <div className="flex-1 h-9 bg-gray-200 rounded"></div>
-                    <div className="w-10 h-9 bg-gray-200 rounded"></div>
-                  </div>
-                  <div className="flex-1 h-9 bg-gray-200 rounded"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      // Actual form content when schema is loaded
-      return (
-        <div key={form._id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 relative">
-          {/* Action buttons at top right corner */}
-          <div className="absolute top-3 right-3 flex gap-1 z-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {forms.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">📝</div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No forms yet</h3>
+            <p className="text-gray-500 mb-4">Create your first AI-generated form to get started</p>
             <button
-              onClick={() => openEditModal(form)}
-              className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition duration-200"
-              title="Edit Form"
+              onClick={() => setShowFormModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition duration-200"
             >
-              <PencilIcon className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setFormToDelete(form._id)}
-              className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition duration-200"
-              title="Delete Form"
-            >
-              <TrashIcon className="h-4 w-4" />
+              Create Your First Form
             </button>
           </div>
-
-          <div className="p-6 pt-10">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{form.title}</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              {form.schema.fields?.length || 0} fields • {form.submissions?.length || 0} submissions
-            </p>
-            <div className="space-y-1 mb-4">
-              {form.schema.fields?.slice(0, 3).map((field: FormField, index: number) => (
-                <div key={`${form._id}-field-${index}`} className="text-xs text-gray-500 flex items-center">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  {field.label} ({field.type})
+        ) : (
+          forms.map((form) => {
+            // Check if form.schema exists, otherwise show loading skeleton
+            if (!form.schema) {
+              return (
+                <div key={`loading-${form._id}`} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                  <div className="p-6">
+                    {/* Loading skeleton */}
+                    <div className="animate-pulse">
+                      {/* Action buttons skeleton */}
+                      <div className="flex justify-end mb-4">
+                        <div className="flex gap-1">
+                          <div className="w-8 h-8 bg-gray-200 rounded-md"></div>
+                          <div className="w-8 h-8 bg-gray-200 rounded-md"></div>
+                        </div>
+                      </div>
+                      
+                      {/* Title skeleton */}
+                      <div className="h-6 bg-gray-200 rounded mb-4 w-3/4"></div>
+                      
+                      {/* Fields/submissions count skeleton */}
+                      <div className="h-4 bg-gray-200 rounded mb-4 w-1/2"></div>
+                      
+                      {/* Fields list skeleton */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 bg-gray-200 rounded-full mr-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 bg-gray-200 rounded-full mr-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 bg-gray-200 rounded-full mr-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                      
+                      {/* Buttons skeleton */}
+                      <div className="flex gap-2">
+                        <div className="flex-1 flex items-center gap-1">
+                          <div className="flex-1 h-9 bg-gray-200 rounded"></div>
+                          <div className="w-10 h-9 bg-gray-200 rounded"></div>
+                        </div>
+                        <div className="flex-1 h-9 bg-gray-200 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-              {form.schema.fields?.length > 3 && (
-                <div className="text-xs text-gray-400">+{form.schema.fields.length - 3} more fields</div>
-              )}
-              {form.schema.fields?.length === 0 && (
-                <div className="text-xs text-gray-400">No fields defined</div>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {/* Open Link + Copy Icon */}
-              <div className="flex items-center gap-1 flex-1">
-                <button
-                  onClick={() => window.open(`${window.location.origin}/form/${form._id}`, "_blank")}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded transition duration-200 cursor-pointer"
-                >
-                  Open Link
-                </button>
-                <button
-                  onClick={() => copyFormLink(form._id)}
-                  className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition duration-200"
-                  title="Copy Link"
-                >
-                  <ClipboardDocumentIcon className="h-5 w-5 cursor-pointer" />
-                </button>
+              );
+            }
+
+            // Actual form content when schema is loaded
+            return (
+              <div key={form._id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 relative">
+                {/* Action buttons at top right corner */}
+                <div className="absolute top-3 right-3 flex gap-1 z-10">
+                  <button
+                    onClick={() => openEditModal(form)}
+                    className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-md transition duration-200"
+                    title="Edit Form"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setFormToDelete(form._id)}
+                    className="p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition duration-200"
+                    title="Delete Form"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="p-6 pt-10">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{form.title}</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {form.schema.fields?.length || 0} fields • {form.submissions?.length || 0} submissions
+                  </p>
+                  <div className="space-y-1 mb-4">
+                    {form.schema.fields?.slice(0, 3).map((field: FormField, index: number) => (
+                      <div key={`${form._id}-field-${index}`} className="text-xs text-gray-500 flex items-center">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        {field.label} ({field.type})
+                      </div>
+                    ))}
+                    {form.schema.fields?.length > 3 && (
+                      <div className="text-xs text-gray-400">+{form.schema.fields.length - 3} more fields</div>
+                    )}
+                    {form.schema.fields?.length === 0 && (
+                      <div className="text-xs text-gray-400">No fields defined</div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    {/* Open Link + Copy Icon */}
+                    <div className="flex items-center gap-1 flex-1">
+                      <button
+                        onClick={() => window.open(`${window.location.origin}/form/${form._id}`, "_blank")}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded transition duration-200 cursor-pointer"
+                      >
+                        Open Link
+                      </button>
+                      <button
+                        onClick={() => copyFormLink(form._id)}
+                        className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition duration-200"
+                        title="Copy Link"
+                      >
+                        <ClipboardDocumentIcon className="h-5 w-5 cursor-pointer" />
+                      </button>
+                    </div>
+
+                    {/* View Submissions */}
+                    <button
+                      onClick={() => viewSubmissions(form)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded transition duration-200 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <EyeIcon className="h-4 w-4" />
+                        <span>({form.submissions?.length || 0})</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </div>
-
-              {/* View Submissions */}
-              <button
-                onClick={() => viewSubmissions(form)}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded transition duration-200 cursor-pointer"
-              >
-                <div className="flex items-center justify-center gap-1">
-                  <EyeIcon className="h-4 w-4" />
-                  <span>({form.submissions?.length || 0})</span>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    })
-  )}
-</div>
+            );
+          })
+        )}
+      </div>
 
       {/* Create Form Modal */}
       {showFormModal && (
