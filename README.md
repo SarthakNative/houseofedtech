@@ -1,5 +1,5 @@
 # AI-Powered Form Generator
-Generate and share dynamic forms using AI (Google Gemini or mock), track submissions, and support image uploads via Cloudinary. Built with Next.js 15 + TypeScript frontend and Express + MongoDB backend.
+Generate and share dynamic forms using AI (Google Gemini or mock), track submissions, and support image uploads via Cloudinary. Built with Next.js 16 + TypeScript frontend and Express + MongoDB backend.
 ## Live Link
 https://ai-form-generator-application.vercel.app/
 
